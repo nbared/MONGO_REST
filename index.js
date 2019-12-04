@@ -5,6 +5,7 @@ var cors = require('cors')
 var bodyParser = require('body-parser')
 var app = express();
 
+
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -16,7 +17,7 @@ var dbo;
 
 MongoClient.connect(url, function(err, db) {
     if (err) throw err;
-    dbo = db.db("ironrest");
+    dbo = db.db("companies");
     //dbo = db.db("MONGO_REST");
     
 });
@@ -33,6 +34,7 @@ app.post('/createCollection/:collection', function(req, res, next) {
         res.json({collectionCreated:req.params.collection})
     });
 })
+
 
 /**YIKES **/
 app.delete('/deleteCollection/:collection', function(req, res, next){
@@ -127,7 +129,7 @@ app.post('/:collection', function(req, res, next){
 })
 
 app.get('/:collection', function(req, res, next){
-    dbo.collection(req.params.collection).find({}).toArray(function(err, result) {
+    dbo.collection(req.params.collection).find({$and: [{founded_year: {$gte: 2000}}, {founded_year: {$lte:2010}}, {ipo: {$ne: null}}, {"ipo.valuation_amount": {$gte: 10000000}}]},{sort: {name: 1}}).toArray(function(err, result) {
         if (err) throw err;
         res.json(result)
     })
